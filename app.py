@@ -6,8 +6,7 @@ import MySQLdb.cursors, re, hashlib
 app = Flask(__name__)
 
 # Contraseña para encriptar las sesiones
-app.secret_key = 'dev'
-
+app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImthcmltIHRva2VuIiwiaWF0IjoxNTE2MjM5MDIyfQ.yvlR6F7xRnCSBRHTUNmvC6Pcvc_gFZ1C6S6ncEIJltA'
 # Configuración de la base de datos
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -17,7 +16,7 @@ app.config['MYSQL_DB'] = 'aes'
 # Iniciar MySQL
 mysql = MySQL(app)
 
-@app.route('/aes/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'loggedin' in session:
         return redirect(url_for('home'))
@@ -55,7 +54,7 @@ def login():
     return render_template('index.html', msg=msg)
 
 
-@app.route('/aes/logout')
+@app.route('/logout')
 def logout():
     #Borra la sessión del usuario, cierra sesión
     session.pop('loggedin', None)
@@ -65,7 +64,7 @@ def logout():
     # Redirige al inicio sesión
     return redirect(url_for('login'))
 
-@app.route('/aes/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'loggedin' in session:
         return redirect(url_for('home'))
@@ -107,7 +106,7 @@ def register():
     return render_template('register.html', msg=msg)
 
 
-@app.route('/aes/home')
+@app.route('/')
 def home():
     # Verifica si el usuario ha iniciado sesión
     if 'loggedin' in session:
