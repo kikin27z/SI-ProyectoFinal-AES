@@ -1,5 +1,14 @@
+"""
+py -m pip install Flask-Caching
+py -m pip install Flask-MySQLdb
+py -m pip install Flask
+py -m pip install Flask-Session
+py -m pip install Flask-MySQL
+"""
+
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
+from flask_caching import Cache
 import MySQLdb.cursors
 import MySQLdb.cursors, re, hashlib
 
@@ -7,6 +16,7 @@ app = Flask(__name__)
 
 # Contraseña para encriptar las sesiones
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImthcmltIHRva2VuIiwiaWF0IjoxNTE2MjM5MDIyfQ.yvlR6F7xRnCSBRHTUNmvC6Pcvc_gFZ1C6S6ncEIJltA'
+app.config['CACHE_TYPE'] = 'simple'
 # Configuración de la base de datos
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -56,11 +66,13 @@ def login():
 
 @app.route('/logout')
 def logout():
+    
     #Borra la sessión del usuario, cierra sesión
     session.pop('loggedin', None)
     session.pop('id', None)
     session.pop('username', None)
 
+    print(session)
     # Redirige al inicio sesión
     return redirect(url_for('login'))
 
@@ -109,6 +121,7 @@ def register():
 @app.route('/')
 def home():
     # Verifica si el usuario ha iniciado sesión
+    print(session)
     if 'loggedin' in session:
         # Usuario ha iniciado sesión, mostrar la página de inicio
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
