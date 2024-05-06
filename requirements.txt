@@ -3,6 +3,5 @@ Flask
 flask-caching
 flask-sqlalchemy
 pycryptodome
-re
 sqlalchemy
 gunicorn
