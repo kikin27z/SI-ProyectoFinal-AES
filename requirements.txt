@@ -1,8 +1,8 @@
 pip
-Flask==1.1.2
-flask-caching==1.10.1
-flask-sqlalchemy==2.5.1
-pycryptodome==3.10.1
-re==2.2.1
-sqlalchemy==1.4.15
+Flask
+flask-caching
+flask-sqlalchemy
+pycryptodome
+re
+sqlalchemy
 gunicorn
