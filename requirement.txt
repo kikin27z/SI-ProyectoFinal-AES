@@ -1,6 +1,0 @@
-Flask-Caching
-Flask-MySQLdb
-Flask
-Flask-Session
-Flask-MySQL
-pycryptodome

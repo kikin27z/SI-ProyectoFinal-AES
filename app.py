@@ -20,7 +20,6 @@ from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad
 from Crypto.Util.Padding import unpad
 from Crypto.Random import get_random_bytes
-from cryptography.fernet import Fernet
 
 
 app = Flask(__name__)

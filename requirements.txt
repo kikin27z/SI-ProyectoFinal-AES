@@ -1,0 +1,12 @@
+Flask
+Flask-Caching
+Flask-MySQLdb
+Flask-Session
+Flask-MySQL
+pycryptodome
+cryptography
+Crypto.Cipher
+Crypto.Hash
+base64
+Crypto.Util.Padding
+Crypto.Random
