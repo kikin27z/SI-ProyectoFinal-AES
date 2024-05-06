@@ -3,7 +3,7 @@ USE `aes`;
 
 CREATE TABLE IF NOT EXISTS `cuentas` (
 	`id` BIGINT NOT NULL AUTO_INCREMENT,
-  	`usuario` varchar(50) NOT NULL UNIQUE,
+  	`usuario` varchar(255) NOT NULL UNIQUE,
   	`contrasena` varchar(255) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;

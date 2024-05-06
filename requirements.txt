@@ -1,3 +1,4 @@
+pip
 Flask
 Flask-Caching
 Flask-MySQLdb
@@ -7,3 +8,4 @@ pycryptodome
 cryptography
 SQLAlchemy
 Flask-SQLAlchemy
+gunicorn
