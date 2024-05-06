@@ -9,20 +9,21 @@ py -m pip install cryptography
 """
 
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_mysqldb import MySQL
 from flask_caching import Cache
 from flask import jsonify
-import MySQLdb.cursors
-import MySQLdb.cursors, re, hashlib
 import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad
 from Crypto.Util.Padding import unpad
 from Crypto.Random import get_random_bytes
-
+from flask_sqlalchemy import SQLAlchemy
+import re
+from sqlalchemy import text
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.ksbduitjszwlavfomcxn:2psdN2jFvq$Tw!wuab2dNU@aws-0-us-west-1.pooler.supabase.com:5432/postgres'
+db = SQLAlchemy(app)
 
 # Contraseña para encriptar las sesiones
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImthcmltIHRva2VuIiwiaWF0IjoxNTE2MjM5MDIyfQ.yvlR6F7xRnCSBRHTUNmvC6Pcvc_gFZ1C6S6ncEIJltA'
@@ -31,19 +32,34 @@ app.contrasenaIV = b'\xf5\x9f\x83\x8d\xb4\xaev\xfe\x06m\xa5ya\x836\x1f'
 app.contrasenaClave = "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
 app.usuarioClave = "0e8d124994d74f4bf03ec83febff6fcba0b7c8cc0e01c3d5f2d9a4b07498a6a5"
 
-app.config['CACHE_TYPE'] = 'simple'
+
 # Configuración de la base de datos
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'JFK_jfk27'
-app.config['MYSQL_DB'] = 'aes'
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_PASSWORD'] = 'JFK_jfk27'
+# #app.config['MYSQL_PASSWORD'] = '2psdN2jFvq$Tw!wuab2dNU'
+# app.config['MYSQL_DB'] = 'aes'
+
+# Database configuration
+
+class Cuentas(db.Model):
+    __tablename__ = 'cuentas'
+    id = db.Column(db.Integer, primary_key=True)
+    usuario = db.Column(db.String(255), nullable=False)
+    contrasena = db.Column(db.String(255), nullable=False)
+
+with app.app_context():
+    db.create_all()
+
+# Initialize the cache
+cache = Cache(app)
+
 
 # Iniciar MySQL
-mysql = MySQL(app)
+#mysql = MySQL(app)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    
     if 'loggedin' in session:
         return redirect(url_for('home'))
     # Mensaje en caso de error al ingresar
@@ -60,16 +76,23 @@ def login():
         usuario = encriptar_mensaje_aes(usuario, app.usuarioClave,app.usuarioIV)
 
         # Verifica si el usuario y la contraseña existen en la base de datos
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM cuentas WHERE usuario = %s AND contrasena = %s', (usuario, contrasena,))
+                # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                # cursor.execute('SELECT * FROM cuentas WHERE usuario = %s AND contrasena = %s', (usuario, contrasena,))
         # Devuelve un registro y retorna el resultado
-        cuenta = cursor.fetchone()
+                #cuenta = cursor.fetchone()
 
+        cuenta = None
+        with db.engine.connect() as connection:
+            result = connection.execute(text("SELECT * FROM cuentas WHERE usuario = :usuario AND contrasena = :contrasena"), {'usuario': usuario, 'contrasena': contrasena})
+            row = result.fetchone()
+            if row is not None:
+                cuenta = dict(zip(result.keys(), row))
         if cuenta:
             # Crea la sesión del usuario, inicia sesión y retiene cierta info para trabajar con otras rutas
             usuariodescifrado = desencriptar_mensaje_aes(cuenta['usuario'], app.usuarioClave)
             
-            cuenta['usuario'] = usuariodescifrado
+            #cuenta['usuario'] = usuariodescifrado
+            print(cuenta['usuario'])
             session['loggedin'] = True
             session['id'] = cuenta['id']
             session['username'] = usuariodescifrado
@@ -110,10 +133,12 @@ def register():
         usuarioEncriptado = encriptar_mensaje_aes(usuario, app.usuarioClave,app.usuarioIV)
 
         # Verifica si la cuenta existe en la base de datos
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM cuentas WHERE usuario = %s', (usuarioEncriptado,))
-        account = cursor.fetchone()
-
+        account = None
+        with db.engine.connect() as connection:
+            result = connection.execute(text("SELECT * FROM cuentas WHERE usuario = :usuario"), {'usuario': usuarioEncriptado})
+            account = result.fetchone()
+        
+        
         # Verificación de los datos del formulario, en caso de que no cumpla con las condiciones,
         # se mostrará un mensaje de error
         if account:
@@ -131,9 +156,10 @@ def register():
             usuario = encriptar_mensaje_aes(usuario, app.usuarioClave)
             contrasena = encriptar_mensaje_aes(contrasena, app.contrasenaClave,app.contrasenaIV)
             
-            # Inserta la nueva cuenta en la base de datos
-            cursor.execute('INSERT INTO cuentas (usuario,contrasena) VALUES  (%s, %s)', (usuarioEncriptado, contrasena,))
-            mysql.connection.commit()
+            # Guarda la cuenta en la base de datos
+            cuenta_agregada = Cuentas(usuario=usuarioEncriptado, contrasena=contrasena)
+            db.session.add(cuenta_agregada)
+            db.session.commit()
             msg = '¡Cuenta creada exitosamente!'
     
     return render_template('register.html', msg=msg)
@@ -144,12 +170,9 @@ def home():
     # Verifica si el usuario ha iniciado sesión
     print(session)
     if 'loggedin' in session:
-        # Usuario ha iniciado sesión, mostrar la página de inicio
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM cuentas WHERE id = %s', (session['id'],))
-        cuenta = cursor.fetchone()
-        cuenta['usuario'] = desencriptar_mensaje_aes(cuenta['usuario'], app.usuarioClave)
-        return render_template('convertidor.html', cuenta=cuenta)
+        # Usuario ha iniciado sesión, muestra la página de inicio
+        return render_template('convertidor.html', cuenta=session)
+        
     
     # Usuario no ha iniciado sesión, redirige al inicio sesión
     return redirect(url_for('login'))

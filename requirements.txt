@@ -1,11 +1,10 @@
 pip
 Flask
 Flask-Caching
-Flask-MySQLdb
 Flask-Session
-Flask-MySQL
 pycryptodome
 cryptography
 SQLAlchemy
-Flask-SQLAlchemy
+psycopg2-binary
+flask_sqlalchemy
 gunicorn

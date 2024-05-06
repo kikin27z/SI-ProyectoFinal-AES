@@ -8,4 +8,3 @@ CREATE TABLE IF NOT EXISTS `cuentas` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-INSERT INTO `cuentas` ( `usuario`, `contrasena`) VALUES ('gibran', 'b7eccd0059d6d7dc2ef76c35d6de0048cc8c029d');
