@@ -20,6 +20,7 @@ from Crypto.Random import get_random_bytes
 from flask_sqlalchemy import SQLAlchemy
 import re
 from sqlalchemy import text
+from flask import flash
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.ksbduitjszwlavfomcxn:2psdN2jFvq$Tw!wuab2dNU@aws-0-us-west-1.pooler.supabase.com:5432/postgres'
@@ -58,12 +59,20 @@ cache = Cache(app)
 # Iniciar MySQL
 #mysql = MySQL(app)
 
+@app.after_request
+def add_no_cache(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'loggedin' in session:
         return redirect(url_for('home'))
     # Mensaje en caso de error al ingresar
     msg = ''
+    
 
     # Verifica si el usuario ha enviado el formulario
     if request.method == 'POST' and 'usuario' in request.form and 'contrasena' in request.form:
@@ -91,8 +100,6 @@ def login():
             # Crea la sesión del usuario, inicia sesión y retiene cierta info para trabajar con otras rutas
             usuariodescifrado = desencriptar_mensaje_aes(cuenta['usuario'], app.usuarioClave)
             
-            #cuenta['usuario'] = usuariodescifrado
-            print(cuenta['usuario'])
             session['loggedin'] = True
             session['id'] = cuenta['id']
             session['username'] = usuariodescifrado
@@ -161,6 +168,8 @@ def register():
             db.session.add(cuenta_agregada)
             db.session.commit()
             msg = '¡Cuenta creada exitosamente!'
+            
+            return redirect(url_for('home', msg='¡Cuenta creada exitosamente!'))
     
     return render_template('register.html', msg=msg)
 
