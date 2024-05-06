@@ -1,22 +1,59 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>{% block title %}{% endblock %}</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
-	</head>
-	<body class="loggedin">
+
+<head>
+	<meta charset="utf-8">
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body class="loggedin">
+	<div class="contenedor">
 		<nav class="navtop">
 			<div>
-				<h1>Bienvenido, {{ cuenta['usuario'] }}</h1>
-                <a href="#"><i class="fas fa-home"></i>Home</a>
-				<a href="#"><i class="fas fa-user-circle"></i>Profile</a>
+				<h3>Bienvenido, {{ cuenta['usuario'] }}</h3>
+
 				<a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Cerrar sesión</a>
 			</div>
 		</nav>
-		<div class="content">
-			{% block content %}{% endblock %}
+		<div class="centrado" style="background-position: -37.0573px -44.2784px;">
+			<h1>Cifrado AES SHA256</h1>
+			<h2 class="dummy">Se necesita tener JavaScript habilitado.</h2>
+			<form class="form" action="" id="form" autocomplete="off" style="height: 60%;">
+				<div class="itable">
+					<div class="itr">
+						<div class="itd" id="celda-areatexto">
+							<textarea id="areatexto"></textarea>
+						</div>
+					</div>
+					<div class="itr">
+						<div class="itd" id="celda-pass">
+							<div class="caja">
+								<div class="caja-izquierda">
+									<input type="password" id="pass" maxlength="32" placeholder="Clave de cifrado">
+								</div>
+								<div class="caja-derecha"></div>
+							</div>
+						</div>
+						<div class="itd" id="celda-botones">
+							<button type="button" class="btn" id="cifrar">Cifrar</button>
+							<button type="button" class="btn" id="descifrar">Descifrar</button>
+						</div>
+					</div>
+				</div>
+			</form>
+			<div class="alerta" style="visibility: hidden;">
+				<p id="aviso">&nbsp;</p>
+			</div>
 		</div>
-	</body>
+	</div>
+	<div class="content">
+		{% block content %}{% endblock %}
+	</div>
+</body>
+<script type="text/javascript" src="{{url_for ('static',filename='convertidor.js')}} "></script>
+
 </html>

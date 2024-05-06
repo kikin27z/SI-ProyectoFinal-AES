@@ -8,13 +8,9 @@ form.addEventListener("submit", function(event) {
   var recaptcha = document.querySelector('#g-recaptcha-response').value;
   if (recaptcha === "") { 
     event.preventDefault();
-    alert("Please check the reCAPTCHA");
+    alert("Llena el captcha");
   }
 });
-
-function name(params) {
-    
-}
 
 function limpiarLogin() {
     let txtContrasena = document.querySelector("#contrasena");
@@ -23,3 +19,5 @@ function limpiarLogin() {
     txtUsuario.value = "";
 }
 limpiarLogin();
+
+
